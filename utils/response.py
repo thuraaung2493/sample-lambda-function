@@ -1,13 +1,16 @@
 """Utility functions for building HTTP responses."""
 
+import os
 import json
 from utils.exceptions import AppError
+
+FRONTEND_ORIGIN = os.getenv("FRONTEND_ORIGIN", "http://localhost:5173")
 
 def build_response(body=None, status_code=200, cookies=None):
     """Build an HTTP response."""
     headers = {
         "Content-Type": "application/json",
-        "Access-Control-Allow-Origin": "https://your-frontend-domain.com",
+        "Access-Control-Allow-Origin": FRONTEND_ORIGIN,
         "Access-Control-Allow-Credentials": "true",
         "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
         "Access-Control-Allow-Headers": "Content-Type,Authorization",

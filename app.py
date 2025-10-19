@@ -13,24 +13,21 @@ ROUTES = {
 def main(event, context):
     """Main entry point for AWS Lambda."""
     http_method = event.get("httpMethod", "")
-    path = event.get("path", "")
+    path = event.get("path", "").rstrip("/")
+
+    print(f"Received request: {http_method} {path}")
 
     if http_method == "OPTIONS":
-        return {
-            "statusCode": 200,
-            "headers": {
-                "Access-Control-Allow-Origin": "http://localhost:5173",
-                "Access-Control-Allow-Credentials": "true",
-                "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
-                "Access-Control-Allow-Headers": "Content-Type,Authorization",
-            },
-            "body": "",
-        }
+        return build_response({}, status_code=200)
 
     key = f"{http_method} {path}"
-    print(f"Routing request: {key}")
     handler = ROUTES.get(key)
     if not handler:
         return build_response({"error": "Not Found"}, status_code=404)
 
-    return handler(event, context)
+    try:
+        response = handler(event, context)
+        return response
+    except (ValueError, KeyError, RuntimeError) as e:
+        print("Handler error:", e, flush=True)
+        return build_response({"error": str(e)}, status_code=500)

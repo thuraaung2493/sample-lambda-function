@@ -1,6 +1,7 @@
 """ Authentication handlers for login, registration, and logout. """
 
 import json
+from dtos.user_dto import LoginInputDTO, RegisterInputDTO
 from utils.response import handle_exceptions, build_response, make_cookie
 from services.auth_service import login_user, register_user
 
@@ -8,9 +9,8 @@ from services.auth_service import login_user, register_user
 def login(event, _context):
     """Login a user and return a JWT token."""
     body = json.loads(event.get("body") or "{}")
-    email = body.get("email")
-    password = body.get("password")
-    result = login_user(email, password)
+    dto = LoginInputDTO(**body)
+    result = login_user(dto)
     cookie = make_cookie("access_token", result["token"], max_age=3600)
     return build_response({"user": result["user"]}, cookies=cookie)
 
@@ -18,10 +18,8 @@ def login(event, _context):
 def register(event, _context):
     """Register a new user and return a JWT token."""
     body = json.loads(event.get("body") or "{}")
-    email = body.get("email")
-    password = body.get("password")
-    name = body.get("name")
-    result = register_user(email, password, name)
+    dto = RegisterInputDTO(**body)
+    result = register_user(dto)
     cookie = make_cookie("access_token", result["token"], max_age=3600)
     print(f"Register response cookie: {cookie}")
     return build_response({"user": result["user"]}, cookies=cookie)
